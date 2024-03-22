@@ -16,8 +16,8 @@
   </style>
 </head>
 <body>
-  <video id="video" width="320" height="240" autoplay></video>
-  <canvas id="output" width="320" height="240"></canvas>
+  <video id="video" width="90%" height="auto" autoplay></video>
+  <canvas id="output" width="90%" height="auto"></canvas>
 
   <script>
     async function runPoseNet() {
@@ -30,8 +30,11 @@
       const detectPose = async (stream) => {
         video.srcObject = stream;
         video.addEventListener('loadeddata', () => {
-          video.width = 640; // Ajusta según sea necesario
-          video.height = 480; // Ajusta según sea necesario
+          const videoRatio = video.videoWidth / video.videoHeight;
+          video.width = window.innerWidth; // Ajusta el ancho del video al ancho de la ventana
+          video.height = video.width / videoRatio; // Calcula la altura proporcionalmente
+          outputCanvas.width = video.width;
+          outputCanvas.height = video.height;
 
           const poseDetectionFrame = () => {
             const pose = net.estimateSinglePose(video, {
@@ -62,9 +65,9 @@
 
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({
-        'audio': false,
-        'video': true
-      });
+          'audio': false,
+          'video': true
+        });
         detectPose(stream);
       }
     }
@@ -75,8 +78,8 @@
         if (keypoint.score > 0.5) {
           const { x, y } = keypoint.position;
           // Ajusta las coordenadas según el tamaño del lienzo
-          const adjustedX = (x / video.width) * outputCanvas.width; // Sin inversión horizontal
-          const adjustedY = (y / video.height) * outputCanvas.height;
+          const adjustedX = (x) ;//(x / video.videoWidth) * outputCanvas.width; // Utilizamos video.videoWidth
+          const adjustedY = (y) ;// (y / video.videoHeight) * outputCanvas.height; // Utilizamos video.videoHeight
           ctx.beginPath();
           ctx.arc(adjustedX, adjustedY, 5, 0, 2 * Math.PI);
           ctx.fillStyle = 'red';
@@ -90,10 +93,10 @@
         const part1 = pair[0].position;
         const part2 = pair[1].position;
         // Ajusta las coordenadas según el tamaño del lienzo
-        const x1 = (part1.x / video.width) * outputCanvas.width;
-        const y1 = (part1.y / video.height) * outputCanvas.height;
-        const x2 = (part2.x / video.width) * outputCanvas.width;
-        const y2 = (part2.y / video.height) * outputCanvas.height;
+        const x1 = part1.x//(part1.x / video.videoWidth) * outputCanvas.width; // Utilizamos video.videoWidth
+        const y1 = part1.y//(part1.y / video.videoHeight) * outputCanvas.height; // Utilizamos video.videoHeight
+        const x2 = part2.x//(part2.x / video.videoWidth) * outputCanvas.width; // Utilizamos video.videoWidth
+        const y2 = part2.y//(part2.y / video.videoHeight) * outputCanvas.height; // Utilizamos video.videoHeight
 
         ctx.beginPath();
         ctx.moveTo(x1, y1);
